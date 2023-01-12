@@ -6,9 +6,8 @@ export const getAllExchanges = async (token, params) => {
     const response = await api.get('/exchanges', {
       headers: {
         Authorization: `Bearer ${token}`,
-        'Access-Control-Allow-Origin': '*',
       },
-      paramsObj,
+      params: paramsObj,
     });
     const { data } = response;
     return data;
@@ -45,9 +44,13 @@ export const createExchange = async (token, payload) => {
   }
 };
 
-export const updateExchange = async (id, payload) => {
+export const updateExchange = async (token, id, payload) => {
   try {
-    const response = await api.patch(`/exchanges/${id}`, payload);
+    const response = await api.patch(`/exchanges/${id}`, payload, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
     const { data } = response;
     return data;
   } catch (error) {
@@ -55,9 +58,13 @@ export const updateExchange = async (id, payload) => {
   }
 };
 
-export const deleteExchange = async id => {
+export const deleteExchange = async (token, id) => {
   try {
-    const response = await api.delete(`/exchanges/${id}`);
+    const response = await api.delete(`/exchanges/${id}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
     const { data } = response;
     return data;
   } catch (error) {

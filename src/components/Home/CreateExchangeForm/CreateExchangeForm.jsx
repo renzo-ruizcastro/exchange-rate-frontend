@@ -1,9 +1,5 @@
-import { Typography, Form, Input, Button, Row, Col } from 'antd';
-import { useState, useRef, useCallback, useContext } from 'react';
-import { createExchange } from '../../../api/exchanges';
-import AuthContext from '../../../context/auth-context';
-
-const { Title } = Typography;
+import { Form, Input, Button, Row, Col } from 'antd';
+import { useRef } from 'react';
 
 const styles = {
   form: {
@@ -15,15 +11,10 @@ const styles = {
 };
 
 const CreateExchangeForm = props => {
-  const [form] = Form.useForm();
   const fromRef = useRef(null);
   const toRef = useRef(null);
   const rateRef = useRef(null);
   const inverseRateRef = useRef(null);
-
-  const clearInputs = () => {
-    form.resetFields();
-  };
 
   const submitHandler = e => {
     e.preventDefault();
@@ -31,7 +22,6 @@ const CreateExchangeForm = props => {
     const to = toRef.current.input.value;
     const rate = rateRef.current.input.value;
     const inverseRate = inverseRateRef.current.input.value;
-    clearInputs();
     const payload = {
       currency_a: from,
       currency_b: to,
@@ -42,7 +32,7 @@ const CreateExchangeForm = props => {
   };
 
   return (
-    <Form name="create-exchange" form={form} style={styles.form}>
+    <Form name="create-exchange" style={styles.form}>
       <Row justify="center">
         <Col>
           <strong>Create Exchange</strong>
