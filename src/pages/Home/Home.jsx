@@ -1,11 +1,20 @@
-import { useState, useEffect, useContext } from 'react';
-import { Space, Typography, Table, message, Button, Modal } from 'antd';
+import { useState, useEffect, useContext, useRef } from 'react';
+import {
+  Space,
+  Typography,
+  Table,
+  message,
+  Button,
+  Modal,
+  Form,
+  Input,
+} from 'antd';
 import { DeleteOutlined, EditOutlined } from '@ant-design/icons';
-import { useNavigate } from 'react-router-dom';
 import {
   getAllExchanges,
   createExchange,
   deleteExchange,
+  updateExchange,
 } from '../../api/exchanges';
 import { createAudit } from '../../api/audits';
 import AuthContext from '../../context/auth-context';
@@ -27,6 +36,9 @@ const styles = {
 };
 
 const Home = () => {
+  const editFromRef = useRef(null);
+  const editToRef = useRef(null);
+  const editRateRef = useRef(null);
   const { user, token } = useContext(AuthContext);
   const [exchanges, setExchanges] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -57,6 +69,36 @@ const Home = () => {
 
   const cancelDeleteModal = () => {
     setIsDeleteModalOpen(false);
+  };
+
+  const showEditModal = record => {
+    setModalData(record);
+    setIsEditModalOpen(true);
+  };
+
+  const okEditModal = async () => {
+    try {
+      const payload = {
+        from: editFromRef.current.input.value,
+        to: editToRef.current.input.value,
+        rate: editRateRef.current.input.value,
+      };
+      await updateExchange(token, modalData.id, payload);
+      await createAudit({
+        user_id: user.id,
+        exchange_id: modalData.id,
+        log: `PATCH /exchanges/${modalData.id} ${JSON.stringify(payload)}`,
+      });
+      message.success('Exchange updated successfully');
+      fetchExchanges();
+      setIsEditModalOpen(false);
+    } catch (error) {
+      message.error('Error updating exchange');
+    }
+  };
+
+  const cancelEditModal = () => {
+    setIsEditModalOpen(false);
   };
 
   const columns = [
@@ -99,7 +141,12 @@ const Home = () => {
           >
             <DeleteOutlined />
           </Button>
-          <Button htmlType="button" onClick>
+          <Button
+            htmlType="button"
+            onClick={() => {
+              showEditModal(record);
+            }}
+          >
             <EditOutlined />
           </Button>
         </Space>
@@ -163,6 +210,39 @@ const Home = () => {
         <p>FROM: {modalData.from}</p>
         <p>TO: {modalData.to}</p>
         <p>RATE: {modalData.rate}</p>
+      </Modal>
+      <Modal
+        title="Edit Exchange Modal"
+        open={isEditModalOpen}
+        onOk={okEditModal}
+        onCancel={cancelEditModal}
+      >
+        <Form>
+          <Form.Item htmlFor="from">
+            <Input
+              ref={editFromRef}
+              placeholder="from"
+              defaultValue={modalData.from}
+              name="from"
+            />
+          </Form.Item>
+          <Form.Item htmlFor="to">
+            <Input
+              ref={editToRef}
+              placeholder="to"
+              defaultValue={modalData.to}
+              name="to"
+            />
+          </Form.Item>
+          <Form.Item htmlFor="rate">
+            <Input
+              ref={editRateRef}
+              placeholder="rate"
+              defaultValue={modalData.rate}
+              name="rate"
+            />
+          </Form.Item>
+        </Form>
       </Modal>
       <div style={styles.greetings}>
         <Title>Welcome {`${user.username}`}</Title>
