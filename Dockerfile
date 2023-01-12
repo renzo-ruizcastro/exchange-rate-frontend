@@ -6,4 +6,5 @@ COPY yarn.lock ./
 RUN yarn install
 COPY . .
 
-CMD npm run dev
+EXPOSE 3000
+CMD ["npm", "run", "dev"]
