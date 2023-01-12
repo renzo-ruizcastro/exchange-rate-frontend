@@ -1,8 +1,12 @@
 import { useState, useEffect, useContext } from 'react';
-import { Space, Typography, Table, message, Button } from 'antd';
+import { Space, Typography, Table, message, Button, Modal } from 'antd';
 import { DeleteOutlined, EditOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
-import { getAllExchanges, createExchange } from '../../api/exchanges';
+import {
+  getAllExchanges,
+  createExchange,
+  deleteExchange,
+} from '../../api/exchanges';
 import { createAudit } from '../../api/audits';
 import AuthContext from '../../context/auth-context';
 import CreateExchangeForm from '../../components/Home/CreateExchangeForm/CreateExchangeForm';
@@ -23,10 +27,37 @@ const styles = {
 };
 
 const Home = () => {
-  const navigate = useNavigate();
   const { user, token } = useContext(AuthContext);
   const [exchanges, setExchanges] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [modalData, setModalData] = useState('');
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+
+  const showDeleteModal = record => {
+    setModalData(record);
+    setIsDeleteModalOpen(true);
+  };
+
+  const okDeleteModal = async () => {
+    try {
+      await deleteExchange(token, modalData.id);
+      await createAudit({
+        user_id: user.id,
+        exchange_id: modalData.id,
+        log: `DELETE /exchanges/${modalData.id}`,
+      });
+      message.success('Exchange deleted successfully');
+      fetchExchanges();
+      setIsDeleteModalOpen(false);
+    } catch (error) {
+      message.error('Error deleting exchange');
+    }
+  };
+
+  const cancelDeleteModal = () => {
+    setIsDeleteModalOpen(false);
+  };
 
   const columns = [
     {
@@ -60,7 +91,12 @@ const Home = () => {
       align: 'center',
       render: (_, record) => (
         <Space size="middle">
-          <Button htmlType="button" onClick>
+          <Button
+            htmlType="button"
+            onClick={() => {
+              showDeleteModal(record);
+            }}
+          >
             <DeleteOutlined />
           </Button>
           <Button htmlType="button" onClick>
@@ -88,9 +124,14 @@ const Home = () => {
   const handleCreateExchange = async payload => {
     try {
       const exchange = await createExchange(token, payload);
-      await createAudit(token, {
+      await createAudit({
         user_id: user.id,
-        exchange_id: exchange.id,
+        exchange_id: exchange.data.exchanges[0].id,
+        log: `POST /exchanges ${JSON.stringify(payload)}`,
+      });
+      await createAudit({
+        user_id: user.id,
+        exchange_id: exchange.data.exchanges[1].id,
         log: `POST /exchanges ${JSON.stringify(payload)}`,
       });
       message.success('Exchange created successfully');
@@ -111,6 +152,18 @@ const Home = () => {
 
   return (
     <>
+      <Modal
+        title="Delete Exchange Modal"
+        open={isDeleteModalOpen}
+        onOk={okDeleteModal}
+        onCancel={cancelDeleteModal}
+      >
+        <p>Are you sure you want to delete this exchange?</p>
+        <p>ID: {modalData.id}</p>
+        <p>FROM: {modalData.from}</p>
+        <p>TO: {modalData.to}</p>
+        <p>RATE: {modalData.rate}</p>
+      </Modal>
       <div style={styles.greetings}>
         <Title>Welcome {`${user.username}`}</Title>
       </div>

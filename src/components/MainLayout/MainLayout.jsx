@@ -25,6 +25,7 @@ const styles = {
   },
   footer: {
     height: '10%',
+    minHeight: 50,
     backgroundColor: 'white',
     textAlign: 'center',
   },
