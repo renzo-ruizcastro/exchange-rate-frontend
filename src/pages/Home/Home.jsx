@@ -126,32 +126,36 @@ const Home = () => {
       dataIndex: 'rate',
       align: 'center',
     },
-    user.role === 1 && {
-      key: 'action',
-      title: 'Action',
-      dataIndex: 'action',
-      align: 'center',
-      render: (_, record) => (
-        <Space size="middle">
-          <Button
-            htmlType="button"
-            onClick={() => {
-              showDeleteModal(record);
-            }}
-          >
-            <DeleteOutlined />
-          </Button>
-          <Button
-            htmlType="button"
-            onClick={() => {
-              showEditModal(record);
-            }}
-          >
-            <EditOutlined />
-          </Button>
-        </Space>
-      ),
-    },
+    ...(user.role === 1
+      ? [
+          {
+            key: 'action',
+            title: 'Action',
+            dataIndex: 'action',
+            align: 'center',
+            render: (_, record) => (
+              <Space size="middle">
+                <Button
+                  htmlType="button"
+                  onClick={() => {
+                    showDeleteModal(record);
+                  }}
+                >
+                  <DeleteOutlined />
+                </Button>
+                <Button
+                  htmlType="button"
+                  onClick={() => {
+                    showEditModal(record);
+                  }}
+                >
+                  <EditOutlined />
+                </Button>
+              </Space>
+            ),
+          },
+        ]
+      : []),
   ];
 
   const fetchExchanges = async params => {
