@@ -6,6 +6,7 @@ import { getAllExchanges, createExchange } from '../../api/exchanges';
 import { createAudit } from '../../api/audits';
 import AuthContext from '../../context/auth-context';
 import CreateExchangeForm from '../../components/Home/CreateExchangeForm/CreateExchangeForm';
+import ConvertExchangeForm from '../../components/Home/ConvertExchangeForm/ConvertExchangeForm';
 
 const { Title } = Typography;
 
@@ -113,6 +114,7 @@ const Home = () => {
       <div style={styles.greetings}>
         <Title>Welcome {`${user.username}`}</Title>
       </div>
+      <ConvertExchangeForm />
       {createExchangeForm}
       <div style={styles.table}>
         <Table
@@ -120,13 +122,6 @@ const Home = () => {
           dataSource={exchanges}
           loading={loading}
           rowKey={item => item.id}
-          onRow={record => {
-            return {
-              onClick: () => {
-                navigate(`/exchanges/${record.id}`);
-              },
-            };
-          }}
         />
       </div>
     </>

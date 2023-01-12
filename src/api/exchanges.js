@@ -6,9 +6,8 @@ export const getAllExchanges = async (token, params) => {
     const response = await api.get('/exchanges', {
       headers: {
         Authorization: `Bearer ${token}`,
-        'Access-Control-Allow-Origin': '*',
       },
-      paramsObj,
+      params: paramsObj,
     });
     const { data } = response;
     return data;
