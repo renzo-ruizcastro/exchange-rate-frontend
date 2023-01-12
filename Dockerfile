@@ -7,4 +7,3 @@ RUN yarn install
 COPY . .
 
 CMD npm run dev
-EXPOSE 3000
